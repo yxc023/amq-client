@@ -1,10 +1,12 @@
 package amq;
 
 import pojo.ParamBean;
-import thread.ThreadPool;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by sammy on 2015/11/10.
@@ -28,7 +30,7 @@ public class AmqMain {
         ParamBean para = new ParamBean();
         boolean over = false;
         try {
-            for(int i = 0; i < args.length && over == false; ++i) {
+            for (int i = 0; i < args.length && over == false; ++i) {
                 switch (args[i]) {
                     case "-h":
                     case "--help":
@@ -36,36 +38,36 @@ public class AmqMain {
                         System.exit(0);
                         break;
                     case "-m":
-                        para.setMode(Integer.valueOf(args[i+1]));
+                        para.setMode(Integer.valueOf(args[i + 1]));
                         i++;
                         break;
                     case "-p":
-                        para.setPersistence(args[i+1].equals("1") ? true : false);
+                        para.setPersistence(args[i + 1].equals("1") ? true : false);
                         i++;
                         break;
                     case "-s":
-                        para.setMqServerLoc(args[i+1]);
+                        para.setMqServerLoc(args[i + 1]);
                         i++;
                         break;
                     case "-l":
-                        para.setMsgSize(Integer.valueOf(args[i+1]));
+                        para.setMsgSize(Integer.valueOf(args[i + 1]));
                         i++;
                         break;
                     case "-q":
-                        para.setQueueName(args[i+1]);
+                        para.setQueueName(args[i + 1]);
                         i++;
                         break;
                     case "-n":
-                        para.setMsgNumer(Integer.valueOf(args[i+1]));
+                        para.setMsgNumer(Integer.valueOf(args[i + 1]));
                         i++;
                         break;
                     case "-t":
-                        para.setMultiThreadNum(Integer.valueOf(args[i+1]));
+                        para.setMultiThreadNum(Integer.valueOf(args[i + 1]));
                         i++;
                         break;
                     case "-d":
-                        StringBuffer stringBuffer = new StringBuffer(args[i+1]);
-                        for(int j = i+2; j<args.length; ++ j) {
+                        StringBuffer stringBuffer = new StringBuffer(args[i + 1]);
+                        for (int j = i + 2; j < args.length; ++j) {
                             stringBuffer.append(" ").append(args[j]);
                         }
                         para.setData(stringBuffer.toString());
@@ -91,34 +93,38 @@ public class AmqMain {
         }
 
 
-        if(para.getMode() == 1) {
-            if(para.getMultiThreadNum() == 1) {
+        if (para.getMode() == 1) {
+            if (para.getMultiThreadNum() == 1) {
                 Publisher publisher = new Publisher(para);
                 publisher.run();
-            }
-            else {
+            } else {
                 int threadNum = para.getMultiThreadNum();// > 16 ? 16 : para.getMultiThreadNum();
-                ExecutorService service = ThreadPool.getInstance();
-                for(int i = 0; i < threadNum; ++i) {
+                ExecutorService service = Executors.newFixedThreadPool(para.getMultiThreadNum());
+                long t = System.currentTimeMillis();
+                for (int i = 0; i < threadNum; ++i) {
                     service.submit(new Publisher(para));
                 }
+                service.shutdown();
+                service.awaitTermination(10000, TimeUnit.SECONDS);
+                System.out.println("start at " + new Date(t));
+                System.out.println("耗时: " + (System.currentTimeMillis() - t) + "ms");
+
             }
 
-        }
-        else if(para.getMode() == 2) {
-            if(para.getMultiThreadNum() == 1) {
+        } else if (para.getMode() == 2) {
+            if (para.getMultiThreadNum() == 1) {
                 Listener listener = new Listener(para);
                 listener.run();
-            }
-            else {
+            } else {
                 int threadNum = para.getMultiThreadNum();// > 16 ? 16 : para.getMultiThreadNum();
-                ExecutorService service = ThreadPool.getInstance();
-                for(int i = 0; i < threadNum; ++i) {
+                ExecutorService service = Executors.newFixedThreadPool(para.getMultiThreadNum());
+                for (int i = 0; i < threadNum; ++i) {
                     service.submit(new Listener(para));
                 }
+                service.shutdown();
+                service.awaitTermination(10000, TimeUnit.SECONDS);
             }
-        }
-        else {
+        } else {
             System.out.println("stupid guy, check your input again!");
         }
     }

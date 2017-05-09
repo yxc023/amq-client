@@ -15,7 +15,7 @@ public class ThreadPool {
         if(threadExecutor == null) {
             synchronized (obj) {
                 if (threadExecutor == null) {
-                    threadExecutor = Executors.newFixedThreadPool(128);
+                    threadExecutor = Executors.newFixedThreadPool(1000);
                 }
             }
         }

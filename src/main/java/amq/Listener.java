@@ -59,7 +59,7 @@ public class Listener implements Runnable{
         while (true) {
             {
                 Message msg = consumer.receive();
-                System.out.println(Thread.currentThread().getId() + "*****************");
+//                System.out.println(Thread.currentThread().getId() + "*****************");
                 myCount++;
                 if (msg instanceof TextMessage) {
                     String body = ((TextMessage) msg).getText();
@@ -88,7 +88,7 @@ public class Listener implements Runnable{
                     System.out.println("Unexpected message type: " + msg.getClass());
                 }
 
-                if (myCount % 10 == 0) {
+                if (myCount % 10000 == 0) {
                     now = System.currentTimeMillis();
                     double rate = 10000 * 1000 / 1;
                     double time = (now - start) / 1000;

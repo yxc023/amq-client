@@ -5,9 +5,9 @@ package amq; /**
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ import pojo.ParamBean;
 
 import javax.jms.*;
 
-public class Publisher implements Runnable{
+public class Publisher implements Runnable {
 
     private ParamBean p;
 
@@ -29,7 +29,7 @@ public class Publisher implements Runnable{
     }
 
     public void send(ParamBean param) throws Exception {
-        System.out.println("begin to send......" + param.toString());
+//        System.out.println("begin to send......" + param.toString());
         String body = param.getData();
         int size = param.getMsgSize();
 
@@ -54,33 +54,34 @@ public class Publisher implements Runnable{
         long now = pre;
         long start = pre;
         long index = 1;
-        for( int i=1; i <= param.getMsgNumer(); i ++) {
+        for (int i = 1; i <= param.getMsgNumer(); i++) {
             TextMessage msg = session.createTextMessage(body);
             msg.setIntProperty("id", i);
             producer.send(msg);
             //Thread.sleep(80);
-            if( (i % 10000) == 0) {
+            if ((i % 10000) == 0) {
                 now = System.currentTimeMillis();
                 long interval = now - pre;
                 pre = now;
 
                 double rate = 10000 * 1000 / interval;
-                System.out.println(String.format("Sent No.%s-%s message. Rate is %s tps, internal %s ms", index, i, rate, interval));
+//                System.out.println(String.format("Sent No.%s-%s message. Rate is %s tps, internal %s ms", index, i, rate, interval));
                 index = i;
             }
         }
 
-        System.out.println(Thread.currentThread().getId() + " thread, Total sent " + param.getMsgNumer() + ". Total time cost " + String.valueOf((System.currentTimeMillis() - start) / 1000) + "s"
-        + ". TPS " + String.valueOf(param.getMsgNumer() * 1000 / (System.currentTimeMillis() - start)));
+        System.out.println("[" + Thread.currentThread().getName() + "], Total sent " + param.getMsgNumer() + ". Total time cost " + String.valueOf((System.currentTimeMillis() - start) / 1000) + "s"
+                + ". TPS " + String.valueOf(param.getMsgNumer() * 1000 / (System.currentTimeMillis() - start)));
 
         //producer.send(session.createTextMessage("SHUTDOWN"));
         session.close();
         connection.close();
+
     }
 
     private static String env(String key, String defaultValue) {
         String rc = System.getenv(key);
-        if( rc== null )
+        if (rc == null)
             return defaultValue;
         return rc;
     }
@@ -91,8 +92,8 @@ public class Publisher implements Runnable{
         }
     }*/
 
-    private static String arg(String []args, int index, String defaultValue) {
-        if( index < args.length )
+    private static String arg(String[] args, int index, String defaultValue) {
+        if (index < args.length)
             return args[index];
         else
             return defaultValue;
